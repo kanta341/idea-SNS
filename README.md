@@ -1,4 +1,15 @@
+
+# Idea Generator SNS
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This application is a social networking service (SNS) for generating ideas.  
+Users can use AI to brainstorm business ideas or generate responses to daily themes.  
+Generated ideas can be posted to the timeline, allowing users to engage with each other.
+
+## Status
+
+This app is currently under development.  
+At this stage, only the basic app structure and the timeline feature have been implemented.  
+Future updates will include the development of the idea generation component and the addition of more features.
 
 ## Getting Started
 
