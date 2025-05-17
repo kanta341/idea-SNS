@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String  @id @default(cuid())
+  email String?
+  name  String
+  image String?
+  profile String?
+  LikeCount Int?
+  follow   Follow[] @relation("UserFollows")
+  followedBy Follow[] @relation("UserFollowedBy")
+  posts Post[]
+  Like Like[]
+  Comment Comment[]
+}
+
+model Follow {
+  id           Int   @id @default(autoincrement())
+  followerId   String
+  followingId  String
+  createdAt    DateTime @default(now())
+
+  follower     User @relation("UserFollows", fields: [followerId], references: [id])
+  following    User @relation("UserFollowedBy", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId]) // 同じ組み合わせ禁止
+}
+
+model Post {
+  id         Int      @id @default(autoincrement())
+  authorId   String
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  authorName String?
+  LikeCount Int?
+  CommentCount Int?
+  Like Like[]
+  Comment Comment[]
+
+  author User @relation(fields: [authorId], references: [id])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  postId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])  // 同じUserが同じPostに複数いいねできない
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    String
+  content   String
+  authorName String?
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
