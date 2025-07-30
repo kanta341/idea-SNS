@@ -12,7 +12,7 @@ export default function UserMenu() {
   useEffect(() => {
     if (status === "authenticated") {
       // 未認証ならホームに飛ばす
-      router.push("/profile/mainProfile")
+      router.push("/timeline")
     }
   }, [status, router])
 
@@ -25,7 +25,7 @@ export default function UserMenu() {
     // 認証済みでない状態（基本的には useEffect でリダイレクトされる）
     return (
       <div>
-        <button onClick={() => signIn('credentials', { callbackUrl: '/profile' })}>ログイン</button>
+        <button onClick={() => signIn('credentials', { callbackUrl: '/timeline' })}>ログイン</button>
       </div>
     )
   }

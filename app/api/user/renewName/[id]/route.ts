@@ -1,43 +1,28 @@
-// app/api/users/[id]/route.ts
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { prisma } from '@/app/api/prismaClient';
-import { getToken } from "next-auth/jwt" 
+import { prisma } from "@/app/api/prismaClient"
+import { NextRequest, NextResponse } from "next/server"
 
-interface Params {
-  id: string
-}
-
-export async function POST(req: NextRequest, { params }: { params: Promise<Params> }) {
-  const { id } = await params; 
-  const body = await req.json();
-  const session = await getServerSession(authOptions)
-
-  // 2) token.sub に入っているのが user.id
-  if (session?.user.id !== id) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-  }
-
-  const post = await prisma.user.update({
-    where: { id: id },
-    data: {name: body.name},
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }>}) {
+  
+  const { id: userId } = await params;
+  const { name } = await req.json()
+  // Userの名前を更新
+  const ff = await prisma.user.update({
+    where: { id: userId },
+    data: { name: name },
   })
 
-  return NextResponse.json(post)
+  // PostのauthorNameを更新
+  await prisma.post.updateMany({
+    where: { authorId: userId },
+    data: { authorName: name },
+  })
+  
+
+  // CommentのauthorNameを更新
+  await prisma.comment.updateMany({
+    where: { userId: userId },
+    data: { authorName: name },
+  })
+
+  return NextResponse.json({ success: true })
 }
-
-
-
-
-/*
-やりたいこと
-・サインインして、sessionとデータベースにプロフィールぶんを保存。それを編集できる機能。
-いいねカウントをフロントエンドで手軽に操作→これをsessionとデータベースに保存する。
-
-sessionの良さ（データベースにない点）は、ログイン情報を一度入力してしまえば、その後何度ページをリダイレクトしても、その個人を特定できること。（データベースのみだとそれはできない）
-*/
-
-
-

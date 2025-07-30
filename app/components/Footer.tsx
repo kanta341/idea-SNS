@@ -3,10 +3,15 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Home, Search, User } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useSession, signIn, signOut } from "next-auth/react"
 
 export default function Footer() {
+  const params = useParams();
+  const userId = params.id;
   const pathname = usePathname();
-
+  const { data: session,status,update } = useSession()
+  
   const navItems = [
     {
       name: "タイムライン",
@@ -21,7 +26,7 @@ export default function Footer() {
 
     {
       name: "プロフィール",
-      path: "/profile/mainProfile",
+      path: `/profile/${session?.user.id}`,
       icon: User,
     },
   ];
