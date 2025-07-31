@@ -1,16 +1,22 @@
+//post取得api（userIdから、そのユーザーのポストを取得)
 import { NextResponse } from 'next/server';
 import { prisma } from "@/app/api/prismaClient";
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 
+import type { NextRequest } from "next/server"
 
-export async function GET() {
+interface Params {
+  id: string
+}
+
+export async function POST(req: NextRequest, { params }: { params: Promise<Params> }) {
     try {
-    const session = await getServerSession(authOptions)
+    const body = await req.json();
     const userWithPosts = await prisma.user.findUnique({
-        where: { id: session?.user.id },
+        where: { id: body.id },
         include: {
-            posts: true,   // 👈 関連Postを取得
+            posts: true,
         },
     });
     

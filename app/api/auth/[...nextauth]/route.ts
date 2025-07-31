@@ -39,7 +39,7 @@ export const authOptions : NextAuthOptions = {
       }
       
     },
-    async jwt({ token,trigger, account,session }) {
+    async jwt({ token, trigger, account, session}) {
     // 最初にサインインされた時にセットする用
     //jwt内だと、session.userじゃないっぽいsession.nameみたいに直で呼び出す。なぜなのかは要調査
     
@@ -48,7 +48,6 @@ export const authOptions : NextAuthOptions = {
       token.id = account.providerAccountId
       token.profile = account.profile
       token.LikeCount = account.LikeCount
-
     }
 
     if (trigger === "update" && session?.name) {
@@ -73,7 +72,6 @@ export const authOptions : NextAuthOptions = {
     session.user.id = token.id 
     session.user.profile = token.profile
     session.user.LikeCount = token.LikeCount
-    console.log("session",session)
       return session
     }
   }

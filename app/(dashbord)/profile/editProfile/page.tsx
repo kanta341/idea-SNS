@@ -1,5 +1,5 @@
 "use client"
-
+import { useRouter } from "next/navigation"
 import { profile } from "console"
 import { useSession, signIn } from "next-auth/react"
 import { useState } from "react"
@@ -8,7 +8,7 @@ export default function EditProfileSNS() {
   const { data: session,status,update } = useSession()
   const [newName, setNewName] = useState<string>(session?.user?.name || "")
   const [profileSentence, setProfile] = useState<string>(session?.user?.profile || "")
-
+  const router = useRouter()
   const replaceName = async () => {
     try {
       const res = await fetch(`/api/user/renewName/${session?.user?.id}`, {
@@ -39,6 +39,12 @@ export default function EditProfileSNS() {
     } catch (error) {
       console.error(error)
     }
+  }
+
+
+  const backToProfile = async () => {
+    router.push(`/profile/${session?.user.id}`)
+    
   }
 
   if (!session) {
@@ -103,7 +109,11 @@ export default function EditProfileSNS() {
         <div className="flex justify-between items-center">
           <button
             type="button"
-            onClick={() => { replaceName(); changeProfile() }}
+            onClick={() => {
+              replaceName(); 
+              changeProfile();
+              backToProfile();
+            }}
             className="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600"
           >
             保存

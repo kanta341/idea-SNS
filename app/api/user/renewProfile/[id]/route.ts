@@ -10,18 +10,18 @@ interface Params {
   id: string
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<Params> }) {
-  const { id } = await params; 
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }>}) {
+  const { id: userId } = await params;
   const body = await req.json();
   const session = await getServerSession(authOptions)
   
 
-  if (session?.user.id !== id) {
+  if (session?.user.id !== userId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const post = await prisma.user.update({
-    where: { id: id },
+    where: { id: userId },
     data: { profile: body.name},
   })
   

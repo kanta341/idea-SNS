@@ -10,11 +10,10 @@ import Deletebutton from "@/app/components/deleteButton"
 import { Calendar, Link as LinkIcon, MapPin, MessageCircle, Heart, Repeat, Share } from "lucide-react";
 import Link from 'next/link'
 import '@/app/globals.css'
-import { Inter } from 'next/font/google'
-import { Providers } from '@/app/providers/Providers'
-import type { Metadata } from "next";
-import Footer from "@/app/components/Footer";
+import { useParams } from "next/navigation";
+
 import { usePathname } from "next/navigation";
+import { User } from "@prisma/client";
 // プロフィール用のモックデータ
 interface post {
   id: Number | null // 👈 追加
@@ -42,10 +41,10 @@ const userProfile = {
 
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-      const { data: session,status,update } = useSession()
+  const { data: session,status,update } = useSession()
 
 
-  const [theme, setTheme] = useState<string>("");
+  const [userData, setUserData] = useState<User>();
   const [posts, setPosts] = useState<post[]>([]);
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
   const [aiSuggestion, setAiSuggestion] = useState<string>("");
@@ -54,27 +53,42 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(); // 現在のパス（例：/timeline/123）
   const [tab, setTab] = useState<string>("");
   const router = useRouter()
+
+  const params = useParams();
+  const userId = params.id;
   // -------- Initial fetch --------
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        if (pathname == "/profile/mainProfile"){
+        if (pathname == `/profile/${userId}`){
             setTab("main")
-        }else if (pathname == "/profile/mainProfile/like"){
+        }else if (pathname == `/profile/${userId}/like`){
             setTab("like")
         }else{
             setTab("other")
         }
+        const res = await fetch(`/api/user/getUserInfo/${userId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        })
+
+        if (res.ok) {
+          const userInfo = await res.json();
+          console.log(userInfo)
+          setUserData(userInfo)
+        }
+
       } catch (err) {
         console.error(err);
       }
     };
-
     fetchInitialData();
+    
+
   }, []);
 
   const clickTab = async(tabName:String) => {
-    router.push(`/profile/${tabName}`)
+    router.push(`${tabName}`)
 
   }
 
@@ -91,7 +105,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     
   )
   }
-
 
   return (
     <div className="max-w-screen-md mx-auto">
@@ -117,11 +130,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="mt-3">
-            <h2 className="text-xl font-bold">{session?.user.name}</h2>
-            <p className="text-gray-500 dark:text-gray-400">{session?.user.name}</p>
+            <h2 className="text-xl font-bold">{userData?.name}</h2>
+            <p className="text-gray-500 dark:text-gray-400">{userData?.name}</p>
           </div>
 
-          <p className="mt-3 text-gray-900 dark:text-gray-100">{session?.user.profile}</p>
+          <p className="mt-3 text-gray-900 dark:text-gray-100">{userData?.profile}</p>
 
           <div className="mt-3 flex flex-wrap gap-y-2">
             {userProfile.location && (
@@ -146,11 +159,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <div className="mt-3 flex">
             <div className="mr-4">
-              <span className="font-bold">{session.user.LikeCount}</span>{" "}
+              <span className="font-bold">{userData?.LikeCount}</span>{" "}
               <span className="text-gray-500 dark:text-gray-400">フォロー中</span>
             </div>
             <div>
-              <span className="font-bold">{session.user.LikeCount}</span>{" "}
+              <span className="font-bold">{userData?.LikeCount}</span>{" "}
               <span className="text-gray-500 dark:text-gray-400">フォロワー</span>
             </div>
           </div>
@@ -161,18 +174,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <nav className="flex">
             <button
   className={`flex-1 py-3 border-b-2 font-medium ${tab === "main" ? "border-blue-500 text-blue-500" : "border-transparent text-black dark:text-white"}`}
-  onClick={()=>clickTab("mainProfile")}
+  onClick={()=>clickTab(`/profile/${userId}`)}
 >              投稿
             </button>
             <button
   className={`flex-1 py-3 border-b-2 font-medium ${tab === "like" ? "border-blue-500 text-blue-500" : "border-transparent text-black dark:text-white"}`}
-  onClick={()=>clickTab("mainProfile/like")}
+  onClick={()=>clickTab(`/profile/${userId}/like`)}
 
 >              いいね
             </button>
             <button
   className={`flex-1 py-3 border-b-2 font-medium ${tab === "other" ? "border-blue-500 text-blue-500" : "border-transparent text-black dark:text-white"}`}
-  onClick={()=>clickTab("mainProfile/other")}
+  onClick={()=>clickTab(`/profile/${userId}/other`)}
 
 >              その他
             </button>∏

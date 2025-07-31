@@ -7,6 +7,9 @@ import { useSession, signIn, signOut } from "next-auth/react"
 import { useState, useEffect } from "react";
 import Deletebutton from "@/app/components/deleteButton"
 import { Calendar, Link as LinkIcon, MapPin, MessageCircle, Heart, Repeat, Share } from "lucide-react";
+import Link from 'next/link'
+
+import { useParams } from "next/navigation";
 // プロフィール用のモックデータ
 interface post {
   id: Number | null // 👈 追加
@@ -44,18 +47,23 @@ export default function Profile() {
   const [aiSuggestion, setAiSuggestion] = useState<string>("");
   const [loadingSuggestion, setLoadingSuggestion] = useState<boolean>(false);
   const [finalIdea, setFinalIdea] = useState<string>("");
+  const params = useParams();
+  const userId = params.id;
 
   // -------- Initial fetch --------
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
+        const poses = await fetch("/api/users/profileLine", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: userId }),
+        })
 
-        const Posts = await fetch("/api/users/profileLine/like");
-        if (Posts.ok) {
-            
-          const { likedPosts } = await Posts.json();
-          console.log(likedPosts)
-          setPosts(likedPosts);
+        if (poses.ok) {
+          const { posts } = await poses.json();
+          console.log("ポスtだよ",posts.posts)
+          setPosts(posts.posts);
         }
       } catch (err) {
         console.error(err);
@@ -99,7 +107,7 @@ export default function Profile() {
 
                   
                   <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                    {session.user.name}
+                    {post.authorName}
                   </p>
                   <p className="ml-1 text-gray-500 dark:text-gray-400 truncate">
                     {userProfile.username} · {post.createdAt}
